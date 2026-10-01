@@ -82,8 +82,8 @@ def styles():
             fontSize=13,
             leading=16,
             textColor=INK,
-            spaceBefore=14,
-            spaceAfter=8,
+            spaceBefore=10,
+            spaceAfter=6,
         ),
         "h2": ParagraphStyle(
             "h2",
@@ -92,18 +92,18 @@ def styles():
             fontSize=11.5,
             leading=14,
             textColor=INK,
-            spaceBefore=10,
-            spaceAfter=5,
+            spaceBefore=7,
+            spaceAfter=4,
         ),
         "body": ParagraphStyle(
             "body",
             parent=base["Normal"],
             fontName="Times-Roman",
             fontSize=11,
-            leading=15,
+            leading=14.5,
             textColor=INK,
             alignment=TA_JUSTIFY,
-            spaceAfter=8,
+            spaceAfter=6,
             firstLineIndent=14,
         ),
         "body0": ParagraphStyle(
@@ -111,22 +111,22 @@ def styles():
             parent=base["Normal"],
             fontName="Times-Roman",
             fontSize=11,
-            leading=15,
+            leading=14.5,
             textColor=INK,
             alignment=TA_JUSTIFY,
-            spaceAfter=8,
+            spaceAfter=6,
             firstLineIndent=0,
         ),
         "caption": ParagraphStyle(
             "caption",
             parent=base["Normal"],
             fontName="Times-Italic",
-            fontSize=9.5,
-            leading=12,
+            fontSize=8.5,
+            leading=10.5,
             textColor=MUTED,
             alignment=TA_CENTER,
-            spaceBefore=3,
-            spaceAfter=10,
+            spaceBefore=2,
+            spaceAfter=6,
         ),
         "code": ParagraphStyle(
             "code",
@@ -151,7 +151,7 @@ def styles():
     }
 
 
-def fig(path, caption, s, max_w=6.2 * inch, max_h=2.4 * inch):
+def fig(path, caption, s, max_w=6.2 * inch, max_h=1.7 * inch):
     pic = Image(str(path))
     scale = min(max_w / pic.imageWidth, max_h / pic.imageHeight)
     pic.drawWidth = pic.imageWidth * scale
@@ -159,7 +159,7 @@ def fig(path, caption, s, max_w=6.2 * inch, max_h=2.4 * inch):
     return KeepTogether([pic, Paragraph(caption, s["caption"])])
 
 
-def pair(a, ca, b, cb, s, max_h=2.1 * inch):
+def pair(a, ca, b, cb, s, max_h=1.55 * inch):
     max_w = 3.0 * inch
 
     def one(p, cap):
@@ -180,8 +180,42 @@ def pair(a, ca, b, cb, s, max_h=2.1 * inch):
             [
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("ALIGN", (0, 0), (-1, 0), "CENTER"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 4),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("LEFTPADDING", (0, 0), (-1, -1), 3),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ]
+        )
+    )
+    return table
+
+
+def triple(a, ca, b, cb, c, cc, s, max_h=1.45 * inch):
+    max_w = 2.05 * inch
+
+    def one(p, cap):
+        pic = Image(str(p))
+        scale = min(max_w / pic.imageWidth, max_h / pic.imageHeight)
+        pic.drawWidth = pic.imageWidth * scale
+        pic.drawHeight = pic.imageHeight * scale
+        return pic, Paragraph(cap, s["caption"])
+
+    ia, ca_p = one(a, ca)
+    ib, cb_p = one(b, cb)
+    ic, cc_p = one(c, cc)
+    table = Table(
+        [[ia, ib, ic], [ca_p, cb_p, cc_p]],
+        colWidths=[2.15 * inch, 2.15 * inch, 2.15 * inch],
+    )
+    table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 2),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 2),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
             ]
         )
     )
@@ -278,21 +312,14 @@ def build():
         )
     )
     story.append(
-        pair(
+        triple(
             SHOTS / "js-02-login.png",
-            "Figure 1. Juice Shop login page I inspected.",
+            "Figure 1. Juice Shop login.",
             SHOTS / "js-03b-login-admin.png",
-            "Figure 2. Score Board — Login Admin (Injection).",
-            s,
-            max_h=2.0 * inch,
-        )
-    )
-    story.append(
-        fig(
+            "Figure 2. Login Admin challenge.",
             SHOTS / "js-03c-dom-xss.png",
-            "Figure 3. Score Board — DOM XSS (JWT / broken-auth challenges were listed nearby as well).",
+            "Figure 3. DOM XSS challenge.",
             s,
-            max_h=2.0 * inch,
         )
     )
 
@@ -340,19 +367,19 @@ def build():
             SHOTS / "01-login-form.png",
             "Figure 4. My hardened login form.",
             SHOTS / "03-empty-validation.png",
-            "Figure 5. Empty fields blocked on the client.",
+            "Figure 5. Empty fields blocked.",
             s,
-            max_h=2.0 * inch,
+            max_h=1.6 * inch,
         )
     )
     story.append(
         pair(
             SHOTS / "02-successful-login.png",
-            "Figure 6. Successful login after validation + CSRF.",
+            "Figure 6. Successful login.",
             SHOTS / "04-short-password.png",
             "Figure 7. Short password rejected.",
             s,
-            max_h=2.0 * inch,
+            max_h=1.6 * inch,
         )
     )
 
@@ -403,21 +430,15 @@ def build():
         )
     )
     story.append(
-        pair(
+        triple(
             SHOTS / "05-xss-client-passed-server-blocked.png",
-            "Figure 8. XSS payload passed the client, blocked by the server.",
+            "Figure 8. XSS: client allowed, server blocked.",
             SHOTS / "06-sqli-blocked.png",
-            "Figure 9. SQL injection–style email rejected.",
-            s,
-            max_h=2.05 * inch,
-        )
-    )
-    story.append(
-        fig(
+            "Figure 9. SQLi-style email rejected.",
             SHOTS / "07-api-weakness-evidence.png",
-            "Figure 10. API results: CSRF forgery blocked (403); fetch bypass still stopped by server validation.",
+            "Figure 10. CSRF 403 + fetch bypass blocked.",
             s,
-            max_h=2.2 * inch,
+            max_h=1.7 * inch,
         )
     )
     story.append(
