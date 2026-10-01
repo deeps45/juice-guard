@@ -67,9 +67,18 @@ On login, compare with the stored hash (never reverse the hash):
 const match = await bcrypt.compare(password, user.passwordHash);
 ```
 
+## Intentionally vulnerable draft (Part 3 only)
+
+For the exploitation write-up there is a labeled insecure draft:
+
+- UI: http://127.0.0.1:3847/vulnerable.html
+- API: `POST /api/insecure-login` (reflects email without escaping)
+
+Do **not** use that page as a template for production. The hardened form at `/` is the secure implementation.
+
 ## Assignment write-ups
 
-See [`docs/ASSIGNMENT.md`](docs/ASSIGNMENT.md) for Parts 1–3, and [`docs/submission.pdf`](docs/submission.pdf) for the PDF submission package (includes screenshots from Part 3).
+See [`docs/ASSIGNMENT.md`](docs/ASSIGNMENT.md) and the graded PDF [`docs/submission.pdf`](docs/submission.pdf).
 
 ### Repository link
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juice Shop — Vulnerable Login Draft (for Part 3)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="brand">
+        <p class="brand-mark">OWASP Juice Shop · Draft v0 (INSECURE)</p>
+        <h1>Sign in (vulnerable)</h1>
+        <p class="lede">
+          Early draft used for Part 3 exploitation. Reflects the email with
+          <code>innerHTML</code> and skips server-side sanitization.
+        </p>
+      </header>
+
+      <main>
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="text" autocomplete="off" />
+            <p class="hint" id="email-hint" hidden></p>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="off" />
+            <p class="hint" id="password-hint" hidden></p>
+          </div>
+          <button type="submit" id="submit-btn">Log in</button>
+        </form>
+        <p id="form-status" class="status" role="status" aria-live="polite"></p>
+        <aside class="demo-note">
+          <p>
+            This page is intentionally insecure for coursework. Use the hardened form at
+            <a href="/">/</a> instead.
+          </p>
+        </aside>
+      </main>
+    </div>
+    <script src="/vuln-app.js"></script>
+  </body>
+</html>

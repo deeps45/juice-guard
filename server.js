@@ -15,12 +15,21 @@ const SALT_ROUNDS = 12;
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: false, limit: "16kb" }));
 
-// Defense-in-depth against XSS (Part 3 hardening)
-app.use((_req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'"
-  );
+// Defense-in-depth against XSS on the hardened app.
+// Intentionally skipped for /vulnerable.html labs used in Part 3.
+app.use((req, res, next) => {
+  const insecureLab =
+    req.path === "/vulnerable.html" ||
+    req.path === "/vuln-app.js" ||
+    req.path === "/client-bypass-demo.html" ||
+    req.path === "/api/insecure-login";
+
+  if (!insecureLab) {
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'"
+    );
+  }
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");
   next();
@@ -148,6 +157,30 @@ app.post("/api/login", loginLimiter, async (req, res) => {
       error: "Something went wrong. Please try again.",
     });
   }
+});
+
+/**
+ * INTENTIONALLY INSECURE endpoint for HW 2B Part 3 only.
+ * Reflects the raw email into an HTML message with no escaping / no tag filtering.
+ * Paired with public/vulnerable.html which uses innerHTML.
+ */
+app.post("/api/insecure-login", loginLimiter, (req, res) => {
+  const email = String(req.body?.email || "");
+  const password = String(req.body?.password || "");
+
+  // Weak checks only (mirrors naive client rules) — NOT production safe
+  if (!email.includes("@") || password.length < 8) {
+    return res.status(400).json({
+      ok: false,
+      message: "Basic check failed.",
+    });
+  }
+
+  // VULNERABILITY: reflected XSS sink (unescaped HTML)
+  return res.json({
+    ok: true,
+    message: `Welcome back, ${email}!`,
+  });
 });
 
 /**
