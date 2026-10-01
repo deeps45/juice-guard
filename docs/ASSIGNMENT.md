@@ -3,7 +3,8 @@
 **Student:** Siva Sai Deepank Manoj  
 **Submission PDF:** [`docs/submission.pdf`](submission.pdf)
 
-> **GitHub (required public):** After clicking **Create repo** in Cursor and setting visibility to **Public**, paste your real clone URL into Part 2 of the PDF (and below). Example shape: `https://github.com/<you>/juice-shop-secure-login`
+> **Repository (set to Public for submission):** https://cursor.com/codebase/siva-sai-deepank-manoj/juice-guard  
+> Visibility is currently Private — change it to **Public** in repo settings before submitting.
 
 ---
 
@@ -37,8 +38,8 @@ I built a Juice Shop–style login page in plain **HTML + JavaScript**, served b
 **Run locally:** `npm install && npm start` → open http://127.0.0.1:3847  
 **Demo user:** `demo@juice.shop` / `JuiceShop1!`
 
-**Public GitHub repo:** `https://github.com/<YOUR_USERNAME>/juice-shop-secure-login`  
-*(Replace with your real public URL after Create repo.)*
+**Public repo link:** https://cursor.com/codebase/siva-sai-deepank-manoj/juice-guard  
+*(Open settings on that page and set visibility to **Public** before submitting.)*
 
 ---
 

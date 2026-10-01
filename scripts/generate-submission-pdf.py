@@ -24,7 +24,7 @@ SHOTS = ROOT / "docs" / "screenshots"
 OUT = ROOT / "docs" / "submission.pdf"
 
 # Update this after publishing the GitHub repo (Create repo → Public)
-GITHUB_URL = "https://github.com/<YOUR_USERNAME>/juice-shop-secure-login"
+GITHUB_URL = "https://cursor.com/codebase/siva-sai-deepank-manoj/juice-guard"
 
 
 def styles():
@@ -152,9 +152,8 @@ def build():
     )
     story.append(
         Paragraph(
-            "<i>If the link above still shows a placeholder, click <b>Create repo</b> "
-            "in Cursor, set the repository to <b>Public</b>, then replace the URL in "
-            "this PDF / README with your real GitHub clone URL before submitting.</i>",
+            "<i>Assignment requires a <b>public</b> repository. Open the repo page above, "
+            "go to settings, and set visibility from Private to <b>Public</b> before you submit.</i>",
             s["meta"],
         )
     )
