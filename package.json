@@ -20,5 +20,12 @@
     "bcryptjs": "^3.0.3",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://origin.cursor.com/git/siva-sai-deepank-manoj/tmp-8838a1e7824b9372.git"
   }
 }
