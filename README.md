@@ -73,9 +73,7 @@ See [`docs/ASSIGNMENT.md`](docs/ASSIGNMENT.md) for Parts 1–3, and [`docs/submi
 
 ### Repository link
 
-**Browse:** https://cursor.com/codebase/siva-sai-deepank-manoj/juice-guard  
-
-The repo may start as **Private**. For this assignment, open that page → settings and set visibility to **Public**, then paste the same link into Part 2 of your PDF.
+**Public GitHub:** https://github.com/deeps45/juice-guard
 
 ## License
 

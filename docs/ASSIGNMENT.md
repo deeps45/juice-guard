@@ -3,8 +3,7 @@
 **Student:** Siva Sai Deepank Manoj  
 **Submission PDF:** [`docs/submission.pdf`](submission.pdf)
 
-> **Repository (set to Public for submission):** https://cursor.com/codebase/siva-sai-deepank-manoj/juice-guard  
-> Visibility is currently Private — change it to **Public** in repo settings before submitting.
+> **Public GitHub repository:** https://github.com/deeps45/juice-guard
 
 ---
 
@@ -38,8 +37,7 @@ I built a Juice Shop–style login page in plain **HTML + JavaScript**, served b
 **Run locally:** `npm install && npm start` → open http://127.0.0.1:3847  
 **Demo user:** `demo@juice.shop` / `JuiceShop1!`
 
-**Public repo link:** https://cursor.com/codebase/siva-sai-deepank-manoj/juice-guard  
-*(Open settings on that page and set visibility to **Public** before submitting.)*
+**Public GitHub repo:** https://github.com/deeps45/juice-guard
 
 ---
 

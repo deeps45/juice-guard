@@ -24,7 +24,7 @@ SHOTS = ROOT / "docs" / "screenshots"
 OUT = ROOT / "docs" / "submission.pdf"
 
 # Update this after publishing the GitHub repo (Create repo → Public)
-GITHUB_URL = "https://cursor.com/codebase/siva-sai-deepank-manoj/juice-guard"
+GITHUB_URL = "https://github.com/deeps45/juice-guard"
 
 
 def styles():
@@ -152,8 +152,7 @@ def build():
     )
     story.append(
         Paragraph(
-            "<i>Assignment requires a <b>public</b> repository. Open the repo page above, "
-            "go to settings, and set visibility from Private to <b>Public</b> before you submit.</i>",
+            "<i>Repository is public on GitHub and linked above for graders.</i>",
             s["meta"],
         )
     )
