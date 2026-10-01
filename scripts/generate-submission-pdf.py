@@ -241,17 +241,19 @@ def build():
             SHOTS / "js-02-login.png",
             "Figure 1. Juice Shop login page I inspected.",
             SHOTS / "js-03b-login-admin.png",
-            "Figure 2. Score Board — Login Admin challenge.",
+            "Figure 2. Score Board — Login Admin (Injection).",
             s,
+            max_h=1.75 * inch,
         )
     )
     story.append(
         pair(
             SHOTS / "js-03c-dom-xss.png",
-            "Figure 3. Score Board — DOM XSS challenge.",
+            "Figure 3. Score Board — DOM XSS.",
             SHOTS / "js-03d-jwt.png",
             "Figure 4. Score Board — JWT / broken-auth challenges.",
             s,
+            max_h=1.75 * inch,
         )
     )
 
@@ -316,7 +318,6 @@ def build():
     )
 
     # ===================== PART 3 =====================
-    story.append(PageBreak())
     story.append(Paragraph("Part 3 — Breaking My Own Form", s["h1"]))
     story.append(
         Paragraph(
