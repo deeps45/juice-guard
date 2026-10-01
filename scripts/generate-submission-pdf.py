@@ -304,7 +304,6 @@ def build():
     ))
 
     # -------- C3 --------
-    story.append(PageBreak())
     story.append(Paragraph(
         "Criterion 3 — Identify and exploit weaknesses in my form (20 pts)",
         s["h1"],
@@ -370,24 +369,23 @@ def build():
          Paragraph("6", s["cell"])],
     ], [0.3 * inch, 1.55 * inch, 2.4 * inch, 1.85 * inch, 0.4 * inch]))
 
-    story.append(Paragraph("Evidence from the real form", s["h2"]))
     story.append(Paragraph(
         "Figure 5 shows the XSS password was accepted by client-side checks (the form actually "
-        "submitted) and then rejected by the server. That is the exploitable weakness in the "
-        "browser layer — and why server validation is mandatory.",
+        "submitted) and then rejected by the server — the exploitable browser-layer gap. "
+        "Figure 7 shows the matching API tests (CSRF 403 + fetch bypass).",
         s["body"],
     ))
-    story.append(fig(
-        SHOTS / "05-xss-client-passed-server-blocked.png",
-        "Figure 5. XSS payload passed client checks and was blocked by server validation.",
-        s, max_h=2.35 * inch,
-    ))
     story.append(pair(
+        SHOTS / "05-xss-client-passed-server-blocked.png",
+        "Figure 5. XSS passed client checks; blocked by server.",
         SHOTS / "06-sqli-blocked.png",
         "Figure 6. SQL injection–style email blocked.",
+        s, max_h=2.05 * inch,
+    ))
+    story.append(fig(
         SHOTS / "07-api-weakness-evidence.png",
-        "Figure 7. API tests: CSRF 403 + client-bypass XSS blocked by server.",
-        s, max_h=2.2 * inch,
+        "Figure 7. Real /api/login tests: CSRF forgery blocked (403); client bypass still stopped by server validation.",
+        s, max_h=2.15 * inch,
     ))
 
     story.append(Paragraph("Fixes applied", s["h2"]))
