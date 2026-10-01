@@ -372,7 +372,7 @@ def build():
             SHOTS / "03-empty-validation.png",
             "Figure 5. Empty fields blocked.",
             s,
-            max_h=1.7 * inch,
+            max_h=2.05 * inch,
         )
     )
     story.append(
@@ -382,7 +382,7 @@ def build():
             SHOTS / "04-short-password.png",
             "Figure 7. Short password rejected.",
             s,
-            max_h=1.7 * inch,
+            max_h=2.05 * inch,
         )
     )
 
