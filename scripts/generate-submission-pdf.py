@@ -434,21 +434,15 @@ def build():
         )
     )
     story.append(
-        pair(
+        triple(
             SHOTS / "05-xss-client-passed-server-blocked.png",
-            "Figure 8. XSS: client allowed, server blocked.",
+            "Figure 8. XSS blocked by server.",
             SHOTS / "06-sqli-blocked.png",
-            "Figure 9. SQLi-style email rejected.",
-            s,
-            max_h=1.85 * inch,
-        )
-    )
-    story.append(
-        fig(
+            "Figure 9. SQLi probe rejected.",
             SHOTS / "07-api-weakness-evidence.png",
-            "Figure 10. API results: CSRF forgery blocked (403); fetch bypass still stopped by server validation.",
+            "Figure 10. CSRF 403 + fetch bypass.",
             s,
-            max_h=2.0 * inch,
+            max_h=1.75 * inch,
         )
     )
     story.append(
