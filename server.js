@@ -15,6 +15,17 @@ const SALT_ROUNDS = 12;
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: false, limit: "16kb" }));
 
+// Defense-in-depth against XSS (Part 3 hardening)
+app.use((_req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'"
+  );
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  next();
+});
+
 // Slow down brute-force / credential stuffing attempts
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

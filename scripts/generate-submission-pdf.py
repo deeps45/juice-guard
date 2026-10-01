@@ -399,12 +399,14 @@ def build():
     story.append(Paragraph("Suggested hardening fix", s["h2"]))
     story.append(
         Paragraph(
-            "Even though exploitation failed, one additional fix I would apply is a strict "
-            "<b>Content-Security-Policy</b> header (for example "
-            "<font face='Courier'>default-src 'self'; script-src 'self'</font>) plus "
-            "HTML sanitization for any future user-visible fields. CSP provides defense "
+            "Even though exploitation failed, I also applied a strict "
+            "<b>Content-Security-Policy</b> response header "
+            "(<font face='Courier'>default-src 'self'; script-src 'self'</font>, "
+            "with limited exceptions for Google Fonts). CSP provides defense "
             "in depth: if a future change accidentally uses "
-            "<font face='Courier'>innerHTML</font>, the browser still blocks inline script execution.",
+            "<font face='Courier'>innerHTML</font>, the browser still blocks inline script execution. "
+            "Additional headers: <font face='Courier'>X-Content-Type-Options: nosniff</font> and "
+            "<font face='Courier'>Referrer-Policy: no-referrer</font>.",
             s["body"],
         )
     )

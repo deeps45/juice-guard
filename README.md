@@ -71,6 +71,19 @@ const match = await bcrypt.compare(password, user.passwordHash);
 
 See [`docs/ASSIGNMENT.md`](docs/ASSIGNMENT.md) for Parts 1–3, and [`docs/submission.pdf`](docs/submission.pdf) for the PDF submission package (includes screenshots from Part 3).
 
+### Making this repository public on GitHub
+
+This project was created in Cursor. To satisfy the assignment’s “public GitHub repo” requirement:
+
+1. Click **Create repo** in the Cursor agent view (if you have not already).
+2. Set the repository visibility to **Public**.
+3. Update the GitHub URL placeholder in `docs/ASSIGNMENT.md` and regenerate the PDF:
+   ```bash
+   # edit GITHUB_URL in scripts/generate-submission-pdf.py, then:
+   python3 scripts/generate-submission-pdf.py
+   ```
+4. Paste the public repo URL into your submitted PDF (Part 2).
+
 ## License
 
 MIT
