@@ -1,0 +1,24 @@
+{
+  "name": "juice-shop-secure-login",
+  "version": "1.0.0",
+  "description": "Secure login form inspired by OWASP Juice Shop — assignment demo with client and server validation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "owasp",
+    "juice-shop",
+    "security",
+    "login",
+    "validation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0"
+  }
+}
