@@ -301,6 +301,7 @@ def build():
             SHOTS / "02-successful-login.png",
             "Figure 6. Successful login after validation + CSRF.",
             s,
+            max_h=1.85 * inch,
         )
     )
     story.append(
@@ -310,6 +311,7 @@ def build():
             SHOTS / "04-short-password.png",
             "Figure 8. Short password rejected.",
             s,
+            max_h=1.85 * inch,
         )
     )
 
