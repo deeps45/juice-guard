@@ -311,28 +311,21 @@ def build():
             s["code"],
         )
     )
+    # All Part 1 visuals stay on page 1, then hard-break so Part 2 starts page 2.
     story.append(
-        pair(
+        triple(
             SHOTS / "js-02-login.png",
-            "Figure 1. Juice Shop login page I inspected.",
+            "Figure 1. Juice Shop login.",
             SHOTS / "js-03b-login-admin.png",
-            "Figure 2. Score Board — Login Admin (Injection).",
-            s,
-            max_h=2.05 * inch,
-        )
-    )
-    story.append(
-        pair(
+            "Figure 2. Login Admin.",
             SHOTS / "js-03c-dom-xss.png",
-            "Figure 3. Score Board — DOM XSS.",
-            SHOTS / "js-03d-jwt.png",
-            "Figure 4. Score Board — JWT / broken-auth challenges.",
+            "Figure 3. DOM XSS (JWT challenges listed nearby).",
             s,
-            max_h=2.05 * inch,
+            max_h=1.85 * inch,
         )
     )
 
-    # ===================== PART 2 (starts on a new page) =====================
+    # ===================== PART 2 (always starts on page 2) =====================
     story.append(PageBreak())
     story.append(Paragraph("Part 2 — Front-End Login Form", s["h1"]))
     story.append(
@@ -375,21 +368,21 @@ def build():
     story.append(
         pair(
             SHOTS / "01-login-form.png",
-            "Figure 5. My hardened login form.",
+            "Figure 4. My hardened login form.",
             SHOTS / "03-empty-validation.png",
-            "Figure 6. Empty fields blocked.",
+            "Figure 5. Empty fields blocked.",
             s,
-            max_h=1.85 * inch,
+            max_h=1.7 * inch,
         )
     )
     story.append(
         pair(
             SHOTS / "02-successful-login.png",
-            "Figure 7. Successful login.",
+            "Figure 6. Successful login.",
             SHOTS / "04-short-password.png",
-            "Figure 8. Short password rejected.",
+            "Figure 7. Short password rejected.",
             s,
-            max_h=1.85 * inch,
+            max_h=1.7 * inch,
         )
     )
 
@@ -443,19 +436,19 @@ def build():
     story.append(
         pair(
             SHOTS / "05-xss-client-passed-server-blocked.png",
-            "Figure 9. XSS: client allowed, server blocked.",
+            "Figure 8. XSS: client allowed, server blocked.",
             SHOTS / "06-sqli-blocked.png",
-            "Figure 10. SQLi-style email rejected.",
+            "Figure 9. SQLi-style email rejected.",
             s,
-            max_h=2.0 * inch,
+            max_h=1.85 * inch,
         )
     )
     story.append(
         fig(
             SHOTS / "07-api-weakness-evidence.png",
-            "Figure 11. API results: CSRF forgery blocked (403); fetch bypass still stopped by server validation.",
+            "Figure 10. API results: CSRF forgery blocked (403); fetch bypass still stopped by server validation.",
             s,
-            max_h=2.2 * inch,
+            max_h=2.0 * inch,
         )
     )
     story.append(
