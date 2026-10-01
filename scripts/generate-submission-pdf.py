@@ -34,25 +34,46 @@ RULE = colors.HexColor("#999999")
 def styles():
     base = getSampleStyleSheet()
     return {
+        "course": ParagraphStyle(
+            "course",
+            parent=base["Normal"],
+            fontName="Times-Bold",
+            fontSize=12,
+            leading=15,
+            textColor=INK,
+            alignment=TA_CENTER,
+            spaceAfter=2,
+        ),
         "title": ParagraphStyle(
             "title",
             parent=base["Title"],
             fontName="Times-Bold",
-            fontSize=16,
-            leading=20,
+            fontSize=18,
+            leading=22,
             textColor=INK,
             alignment=TA_CENTER,
-            spaceAfter=4,
+            spaceBefore=2,
+            spaceAfter=2,
+        ),
+        "subtitle": ParagraphStyle(
+            "subtitle",
+            parent=base["Normal"],
+            fontName="Times-Italic",
+            fontSize=11,
+            leading=14,
+            textColor=MUTED,
+            alignment=TA_CENTER,
+            spaceAfter=10,
         ),
         "meta": ParagraphStyle(
             "meta",
             parent=base["Normal"],
             fontName="Times-Roman",
-            fontSize=11,
-            leading=15,
+            fontSize=10.5,
+            leading=14,
             textColor=INK,
             alignment=TA_LEFT,
-            spaceAfter=2,
+            spaceAfter=1,
         ),
         "h1": ParagraphStyle(
             "h1",
@@ -182,35 +203,55 @@ def build():
 
     story = []
 
-    # Title block — simple student header
-    story.append(Paragraph("HW 2B: OWASP Juice Shop", s["title"]))
+    # Title / course header
+    story.append(Paragraph("Texas A&amp;M University", s["course"]))
+    story.append(Paragraph("CSCE 703 — Cybersecurity", s["course"]))
     story.append(Spacer(1, 6))
-    story.append(Paragraph("Siva Sai Deepank Manoj", s["meta"]))
-    story.append(Paragraph("deeps45@tamu.edu", s["meta"]))
-    story.append(
-        Paragraph(
-            f"GitHub: <link href='{GITHUB}'><u>{GITHUB}</u></link>",
-            s["meta"],
+    story.append(Paragraph("Homework 2B", s["title"]))
+    story.append(Paragraph("OWASP Juice Shop: Secure Design, Login Form, and Exploitation", s["subtitle"]))
+    story.append(HRFlowable(width="100%", thickness=1.0, color=INK, spaceBefore=2, spaceAfter=8))
+
+    info = [
+        [Paragraph("<b>Name</b>", s["meta"]), Paragraph("Siva Sai Deepank Manoj", s["meta"])],
+        [Paragraph("<b>UIN</b>", s["meta"]), Paragraph("437005609", s["meta"])],
+        [Paragraph("<b>Email</b>", s["meta"]), Paragraph("deeps45@tamu.edu", s["meta"])],
+        [Paragraph("<b>Course</b>", s["meta"]), Paragraph("CSCE 703", s["meta"])],
+        [
+            Paragraph("<b>GitHub</b>", s["meta"]),
+            Paragraph(f"<link href='{GITHUB}'><u>{GITHUB}</u></link>", s["meta"]),
+        ],
+    ]
+    info_table = Table(info, colWidths=[0.9 * inch, 5.4 * inch])
+    info_table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("TOPPADDING", (0, 0), (-1, -1), 1),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ]
         )
     )
-    story.append(Spacer(1, 4))
-    story.append(HRFlowable(width="100%", thickness=0.8, color=RULE, spaceBefore=4, spaceAfter=10))
+    story.append(info_table)
+    story.append(HRFlowable(width="100%", thickness=0.6, color=RULE, spaceBefore=8, spaceAfter=10))
 
     # ===================== PART 1 =====================
     story.append(Paragraph("Part 1 — Secure Feature Design", s["h1"]))
     story.append(
         Paragraph(
-            "I spent time on the live Juice Shop at preview.owasp-juice.shop, mostly around "
-            "login and the Score Board. Three challenges stood out to me. "
-            "<b>Login Admin</b> is an injection challenge where a crafted email can break a "
-            "string-built SQL login query. To stop that, I would only use parameterized "
-            "queries (or an ORM) and validate the email first so user input never becomes "
-            "part of the query logic. <b>DOM XSS</b> shows how HTML/JavaScript in the page "
-            "can run in someone else’s browser. I would encode output, use textContent "
-            "instead of innerHTML, and add a Content-Security-Policy. For "
-            "<b>Forged Signed JWT</b> / weak auth, I would verify signatures with a strong "
-            "secret, keep tokens short-lived, and rate-limit login attempts. Passwords "
-            "should be stored with bcrypt, not plaintext.",
+            "I explored the live Juice Shop at preview.owasp-juice.shop and used what I found "
+            "to design a safer registration/login flow. Three challenges stood out. "
+            "<b>Login Admin</b> (Injection) shows how a crafted email can break a string-built "
+            "SQL login query. Mitigation: parameterized queries or an ORM, plus email "
+            "validation before any database call—so input stays data, not query code. "
+            "<b>DOM XSS</b> shows how HTML/JavaScript can run in another user’s browser. "
+            "Mitigation: encode output, prefer textContent over innerHTML, and add a "
+            "Content-Security-Policy. <b>Forged Signed JWT</b> / weak authentication shows "
+            "token handling can be abused for account takeover. Mitigation: verify JWT "
+            "signatures with a strong secret, short expiry, server-side authorization, and "
+            "rate-limited login. For registration, passwords must be stored with bcrypt, "
+            "never plaintext.",
             s["body0"],
         )
     )
