@@ -1,15 +1,19 @@
 :root {
-  --bg-deep: #1a2e24;
-  --bg-mid: #243d31;
-  --bg-glow: #3d6b4f;
-  --surface: rgba(247, 242, 232, 0.94);
-  --ink: #142019;
-  --muted: #4a5c52;
-  --accent: #c45c26;
-  --accent-hover: #a34a1c;
-  --ok: #1f6b45;
-  --err: #9b2c2c;
-  --line: rgba(20, 32, 25, 0.14);
+  --bg-0: #0b1220;
+  --bg-1: #132038;
+  --bg-2: #1c3358;
+  --accent: #f5b301;
+  --accent-ink: #1a1400;
+  --accent-hover: #ffc933;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-solid: #f4f7fb;
+  --ink: #101828;
+  --muted: #526074;
+  --ok: #0f7a4c;
+  --err: #b42318;
+  --line: rgba(16, 24, 40, 0.12);
+  --text-light: #e8eef8;
+  --text-soft: #b7c4d8;
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "DM Sans", "Segoe UI", sans-serif;
 }
@@ -30,9 +34,9 @@ body {
   font-family: var(--font-body);
   color: var(--ink);
   background:
-    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(196, 92, 38, 0.22), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 80%, rgba(61, 107, 79, 0.45), transparent 50%),
-    linear-gradient(160deg, var(--bg-deep), var(--bg-mid) 45%, #15241c);
+    radial-gradient(ellipse 90% 70% at 0% 0%, rgba(245, 179, 1, 0.18), transparent 50%),
+    radial-gradient(ellipse 70% 55% at 100% 100%, rgba(56, 120, 220, 0.35), transparent 55%),
+    linear-gradient(155deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
   min-height: 100vh;
 }
 
@@ -59,7 +63,8 @@ body {
   font-size: 0.8rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #d8c7b0;
+  color: var(--accent);
+  font-weight: 700;
 }
 
 h1 {
@@ -68,22 +73,22 @@ h1 {
   font-size: clamp(2rem, 5vw, 2.6rem);
   font-weight: 700;
   line-height: 1.15;
-  color: #f7f2e8;
+  color: var(--text-light);
 }
 
 .lede {
   margin: 0.85rem 0 1.75rem;
-  color: #c9d5ce;
+  color: var(--text-soft);
   line-height: 1.55;
   font-size: 1rem;
 }
 
 main {
-  background: var(--surface);
-  border: 1px solid rgba(247, 242, 232, 0.2);
-  border-radius: 18px;
+  background: var(--surface-solid);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
   padding: 1.5rem;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 28px 50px rgba(0, 0, 0, 0.35);
   animation: fade-in 0.9s ease 0.15s both;
 }
 
@@ -111,8 +116,8 @@ input {
   width: 100%;
   padding: 0.75rem 0.85rem;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #fffef9;
+  border-radius: 4px;
+  background: #fff;
   font: inherit;
   color: var(--ink);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -120,8 +125,8 @@ input {
 
 input:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(196, 92, 38, 0.2);
+  border-color: #2f6fed;
+  box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.2);
 }
 
 input.invalid {
@@ -139,9 +144,9 @@ button[type="submit"] {
   margin-top: 0.35rem;
   padding: 0.85rem 1rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--accent);
-  color: #fffaf4;
+  color: var(--accent-ink);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -190,9 +195,9 @@ button[type="submit"]:disabled {
 
 code {
   font-size: 0.84em;
-  background: rgba(20, 32, 25, 0.06);
+  background: rgba(16, 24, 40, 0.06);
   padding: 0.1rem 0.35rem;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 @media (max-width: 480px) {

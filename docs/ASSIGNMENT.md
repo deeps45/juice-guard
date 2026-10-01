@@ -1,14 +1,28 @@
 # Assignment Write-ups — OWASP Juice Shop Security
 
-> Paste the GitHub repository URL into Part 2 of your PDF after you make the repo public (Create repo in Cursor, then ensure visibility is Public).
+**Student:** Siva Sai Deepank Manoj  
+**Submission PDF:** [`docs/submission.pdf`](submission.pdf)
+
+> **GitHub (required public):** After clicking **Create repo** in Cursor and setting visibility to **Public**, paste your real clone URL into Part 2 of the PDF (and below). Example shape: `https://github.com/<you>/juice-shop-secure-login`
 
 ---
 
 ## Part 1: Secure Feature Design (~100 words)
 
-While exploring OWASP Juice Shop, three realistic attack paths stand out. **(1) SQL injection on login** — classic payloads in the email field can bypass auth when queries are concatenated. **Mitigation:** parameterized queries / ORM lookups only; never build SQL from raw input. **(2) Stored/reflected XSS** — product searches and reviews can run attacker JavaScript in other users’ browsers. **Mitigation:** context-aware output encoding, Content-Security-Policy, and rejecting HTML tags on input. **(3) Authentication bypass / weak secrets** — forged or predictable tokens let attackers impersonate admins. **Mitigation:** signed JWTs with strong secrets, short expiry, and server-side session checks.
+While exploring OWASP Juice Shop, three realistic attack paths stood out.
 
-**Secure password handling:** hash with bcrypt (cost ≥ 12), store only the hash, and verify with `bcrypt.compare`. Never log plaintext passwords. Combined with rate limits and generic “invalid email or password” messages, this registration/login design blocks injection, XSS reflection, and trivial auth bypass.
+**(1) SQL injection on login** — crafted email input can manipulate concatenated SQL and bypass authentication. **Mitigation:** parameterized queries / ORM lookups only; reject malformed emails before the data layer. This stops payloads from changing query logic.
+
+**(2) XSS in search/reviews** — attacker HTML/JS can run in other users’ browsers. **Mitigation:** context-aware output encoding, prefer `textContent` over `innerHTML`, Content-Security-Policy, and reject angle brackets on input so scripts display as text instead of executing.
+
+**(3) Authentication bypass / weak tokens** — predictable or poorly verified sessions impersonate admins. **Mitigation:** signed tokens with strong secrets, short expiry, server-side authorization, rate limits, and generic login errors.
+
+**Secure password handling:** hash with bcrypt (cost ≥ 12), store only the hash, verify with `bcrypt.compare`. Never log plaintext. Even if the DB leaks, attackers get slow-to-crack hashes—not reusable passwords.
+
+```js
+const passwordHash = await bcrypt.hash(password, 12);
+const match = await bcrypt.compare(submittedPassword, user.passwordHash);
+```
 
 ---
 
@@ -18,22 +32,22 @@ I built a Juice Shop–style login page in plain **HTML + JavaScript**, served b
 
 **Client-side (`public/app.js`):** on submit, the form blocks empty fields, requires `@` in the email, and requires passwords ≥ 8 characters before calling the API.
 
-**Server-side (`server.js`):** re-validates email format, password length, and unsafe characters; looks up users in memory (no string-built SQL); verifies passwords with **bcrypt**; returns escaped, generic errors.
+**Server-side (`server.js`):** re-validates email format, password length, and unsafe characters; looks up users in memory (no string-built SQL); verifies passwords with **bcryptjs**; returns escaped, generic errors; rate-limits attempts.
 
-**Run locally:** `npm install && npm start` → open http://127.0.0.1:3847. Demo user: `demo@juice.shop` / `JuiceShop1!`.
+**Run locally:** `npm install && npm start` → open http://127.0.0.1:3847  
+**Demo user:** `demo@juice.shop` / `JuiceShop1!`
 
-**GitHub repo (public):** see repository README — after publishing, use your public clone URL here (example shape: `https://github.com/<you>/<repo>`).
+**Public GitHub repo:** `https://github.com/<YOUR_USERNAME>/juice-shop-secure-login`  
+*(Replace with your real public URL after Create repo.)*
 
 ---
 
 ## Part 3: Exploit a Vulnerability in Your Own Form (~100 words)
 
-I attempted common login attacks against my own form.
+I attempted XSS and SQL injection against my own form.
 
-**SQL injection attempt:** submitted email payloads that try to short-circuit auth (quote / OR-style patterns). The server rejected invalid email shapes and never concatenates SQL — login stayed denied; no credential dump.
+**XSS steps:** email `xss@test.com`, password `<script>alert(1)</script>`, click Log in. **Result:** blocked — no alert; server rejected unsafe characters; UI uses `textContent` (see `docs/screenshots/05-xss-blocked.png`).
 
-**XSS attempt:** entered script-like strings in email/password. Client validation and server unsafe-character checks rejected them; the UI renders status with `textContent` (not `innerHTML`), so no script executed.
+**SQLi steps:** email `admin@test.com' OR '1'='1`, password `password1`. **Result:** blocked — invalid email; no SQL concatenation; no auth bypass (see `docs/screenshots/06-sqli-blocked.png`).
 
-**Result:** attacks **did not succeed** — a good sign that validation + bcrypt + safe rendering hold. **One hardening fix:** add a strict Content-Security-Policy header (`default-src 'self'`) and sanitize any future user-visible fields with a trusted library so reflected content cannot introduce executable markup even if validation is later loosened.
-
-Screenshots of the failed attempts are included in `docs/screenshots/` and in `docs/submission.pdf`.
+**Fix if needed:** add a strict Content-Security-Policy (`default-src 'self'`) so even a future `innerHTML` mistake cannot execute inline scripts. Failing to break the form is a good sign the defenses hold.
