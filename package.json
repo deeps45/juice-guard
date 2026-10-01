@@ -1,7 +1,7 @@
 {
-  "name": "juice-shop-secure-login",
+  "name": "juice-guard",
   "version": "1.0.0",
-  "description": "Secure login form inspired by OWASP Juice Shop — assignment demo with client and server validation",
+  "description": "Juice Guard — secure Juice Shop–inspired login with bcrypt, CSRF, CSP, and layered validation (HW 2B)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -12,9 +12,12 @@
     "juice-shop",
     "security",
     "login",
+    "csrf",
+    "bcrypt",
+    "xss",
     "validation"
   ],
-  "author": "",
+  "author": "Siva Sai Deepank Manoj <deeps45@tamu.edu>",
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -22,11 +25,18 @@
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "directories": {
     "doc": "docs"
   },
   "repository": {
     "type": "git",
-    "url": "https://origin.cursor.com/git/siva-sai-deepank-manoj/tmp-8838a1e7824b9372.git"
-  }
+    "url": "https://github.com/deeps45/juice-guard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/deeps45/juice-guard/issues"
+  },
+  "homepage": "https://github.com/deeps45/juice-guard#readme"
 }
