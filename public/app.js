@@ -1,6 +1,5 @@
 /**
- * Client-side validation for the Juice Shop–style login form.
- * Server-side validation in server.js is the real security boundary.
+ * Client-side validation + CSRF-protected login for the hardened form.
  */
 (function () {
   const form = document.getElementById("login-form");
@@ -10,6 +9,8 @@
   const passwordHint = document.getElementById("password-hint");
   const statusEl = document.getElementById("form-status");
   const submitBtn = document.getElementById("submit-btn");
+
+  let csrfToken = "";
 
   function setHint(el, message) {
     if (!message) {
@@ -27,15 +28,17 @@
     if (type) statusEl.classList.add(type);
   }
 
-  /**
-   * Client checks:
-   * - reject empty submissions
-   * - email must contain "@"
-   * - password must be at least 8 characters
-   */
+  async function refreshCsrf() {
+    const res = await fetch("/api/csrf", { credentials: "same-origin" });
+    const data = await res.json();
+    if (!res.ok || !data.csrfToken) {
+      throw new Error("Could not fetch CSRF token");
+    }
+    csrfToken = data.csrfToken;
+  }
+
   function validateClient(email, password) {
     let valid = true;
-
     emailInput.classList.remove("invalid");
     passwordInput.classList.remove("invalid");
     setHint(emailHint, "");
@@ -64,6 +67,10 @@
     return valid;
   }
 
+  refreshCsrf().catch(() => {
+    setStatus("Could not initialize CSRF protection. Refresh the page.", "err");
+  });
+
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
     setStatus("");
@@ -80,9 +87,15 @@
     setStatus("Checking credentials…");
 
     try {
+      if (!csrfToken) await refreshCsrf();
+
       const response = await fetch("/api/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
         body: JSON.stringify({ email, password }),
       });
 
@@ -90,11 +103,13 @@
 
       if (!response.ok || !data.ok) {
         setStatus(data.error || "Login failed.", "err");
+        // rotate token after failures too
+        await refreshCsrf().catch(() => {});
         return;
       }
 
-      // textContent (not innerHTML) — prevents DOM XSS if message is ever unsafe
       setStatus(data.message, "ok");
+      await refreshCsrf().catch(() => {});
     } catch (_err) {
       setStatus("Could not reach the server. Is it running?", "err");
     } finally {

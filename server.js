@@ -1,11 +1,12 @@
 /**
- * Secure login API inspired by OWASP Juice Shop patterns.
- * Demonstrates parameterized handling, bcrypt password hashing,
- * input validation, and XSS-safe response encoding.
+ * Secure Juice Shop–style login API for HW 2B.
+ * Security: validation, bcrypt, CSRF tokens, CSP, rate limits, no dynamic SQL.
  */
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const path = require("path");
+const crypto = require("crypto");
+const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
 
 const app = express();
@@ -14,28 +15,19 @@ const SALT_ROUNDS = 12;
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: false, limit: "16kb" }));
+app.use(cookieParser());
 
-// Defense-in-depth against XSS on the hardened app.
-// Intentionally skipped for /vulnerable.html labs used in Part 3.
-app.use((req, res, next) => {
-  const insecureLab =
-    req.path === "/vulnerable.html" ||
-    req.path === "/vuln-app.js" ||
-    req.path === "/client-bypass-demo.html" ||
-    req.path === "/api/insecure-login";
-
-  if (!insecureLab) {
-    res.setHeader(
-      "Content-Security-Policy",
-      "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'"
-    );
-  }
+app.use((_req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'"
+  );
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("X-Frame-Options", "DENY");
   next();
 });
 
-// Slow down brute-force / credential stuffing attempts
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -44,8 +36,9 @@ const loginLimiter = rateLimit({
   message: { ok: false, error: "Too many login attempts. Try again later." },
 });
 
-// Demo user store (in-memory). Passwords are NEVER stored in plaintext.
 const users = new Map();
+/** csrfId -> token */
+const csrfStore = new Map();
 
 async function seedUsers() {
   const demoHash = await bcrypt.hash("JuiceShop1!", SALT_ROUNDS);
@@ -68,7 +61,6 @@ function escapeHtml(value) {
 function isValidEmail(email) {
   if (typeof email !== "string") return false;
   const trimmed = email.trim();
-  // Reject control chars / tags; require a basic user@domain shape
   if (trimmed.length < 5 || trimmed.length > 254) return false;
   if (/[<>'"\\;\x00-\x1f]/.test(trimmed)) return false;
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
@@ -77,9 +69,22 @@ function isValidEmail(email) {
 function isValidPassword(password) {
   if (typeof password !== "string") return false;
   if (password.length < 8 || password.length > 128) return false;
-  // Block obvious injection / script fragments in password field
   if (/[<>;]|--|\/\*|\*\//.test(password)) return false;
   return true;
+}
+
+function requireCsrf(req, res, next) {
+  const csrfId = req.cookies?.csrf_id;
+  const provided = req.get("x-csrf-token") || req.body?.csrfToken;
+  const expected = csrfId ? csrfStore.get(csrfId) : null;
+
+  if (!csrfId || !provided || !expected || provided !== expected) {
+    return res.status(403).json({
+      ok: false,
+      error: "Missing or invalid CSRF token.",
+    });
+  }
+  return next();
 }
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -88,14 +93,26 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "secure-login" });
 });
 
-/**
- * Example of secure password handling:
- * 1. Validate input shape on the server (never trust the client).
- * 2. Look up the user by email with a Map/ORM — never concatenate SQL.
- * 3. Compare with bcrypt.compare (constant-time vs stored hash).
- * 4. Return generic error messages (no user enumeration).
- */
-app.post("/api/login", loginLimiter, async (req, res) => {
+/** Issue a per-browser CSRF token (double-submit cookie pattern). */
+app.get("/api/csrf", (_req, res) => {
+  const csrfId = crypto.randomBytes(16).toString("hex");
+  const csrfToken = crypto.randomBytes(24).toString("hex");
+  csrfStore.set(csrfId, csrfToken);
+  // avoid unbounded growth in long-running demos
+  if (csrfStore.size > 2000) {
+    const first = csrfStore.keys().next().value;
+    csrfStore.delete(first);
+  }
+  res.cookie("csrf_id", csrfId, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: false,
+    path: "/",
+  });
+  res.json({ ok: true, csrfToken });
+});
+
+app.post("/api/login", loginLimiter, requireCsrf, async (req, res) => {
   try {
     const email = req.body?.email;
     const password = req.body?.password;
@@ -124,8 +141,6 @@ app.post("/api/login", loginLimiter, async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
     const user = users.get(normalizedEmail);
-
-    // Always run a bcrypt compare timing path to reduce timing leaks
     const hashToCheck = user
       ? user.passwordHash
       : "$2b$12$invalidhashpaddinginvalidhashpaddinginv";
@@ -144,7 +159,6 @@ app.post("/api/login", loginLimiter, async (req, res) => {
       });
     }
 
-    // Escape any reflected values (defense in depth against XSS)
     return res.json({
       ok: true,
       message: `Welcome back, ${escapeHtml(user.email)}!`,
@@ -159,35 +173,7 @@ app.post("/api/login", loginLimiter, async (req, res) => {
   }
 });
 
-/**
- * INTENTIONALLY INSECURE endpoint for HW 2B Part 3 only.
- * Reflects the raw email into an HTML message with no escaping / no tag filtering.
- * Paired with public/vulnerable.html which uses innerHTML.
- */
-app.post("/api/insecure-login", loginLimiter, (req, res) => {
-  const email = String(req.body?.email || "");
-  const password = String(req.body?.password || "");
-
-  // Weak checks only (mirrors naive client rules) — NOT production safe
-  if (!email.includes("@") || password.length < 8) {
-    return res.status(400).json({
-      ok: false,
-      message: "Basic check failed.",
-    });
-  }
-
-  // VULNERABILITY: reflected XSS sink (unescaped HTML)
-  return res.json({
-    ok: true,
-    message: `Welcome back, ${email}!`,
-  });
-});
-
-/**
- * Registration endpoint demonstrating bcrypt hashing at signup time.
- * Hash once with a high cost factor; never log or return the plaintext.
- */
-app.post("/api/register", loginLimiter, async (req, res) => {
+app.post("/api/register", loginLimiter, requireCsrf, async (req, res) => {
   try {
     const email = req.body?.email;
     const password = req.body?.password;
@@ -217,7 +203,6 @@ app.post("/api/register", loginLimiter, async (req, res) => {
     return res.status(201).json({
       ok: true,
       message: "Account created. You can now log in.",
-      // Illustrative only — never return the real hash to browsers in production
       hashingExample: {
         algorithm: "bcrypt",
         saltRounds: SALT_ROUNDS,
@@ -236,6 +221,5 @@ app.post("/api/register", loginLimiter, async (req, res) => {
 seedUsers().then(() => {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Secure login demo listening on http://127.0.0.1:${PORT}`);
-    console.log(`Demo account: demo@juice.shop / JuiceShop1!`);
   });
 });
