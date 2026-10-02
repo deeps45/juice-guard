@@ -311,7 +311,7 @@ def build():
             "design takeaway is short: treat every field as hostile, keep queries parameterized, "
             "never render raw HTML from users, verify tokens correctly, and hash passwords with "
             "bcrypt before storage. Those habits map directly onto the three breaks I documented "
-            "with input and observed result.",
+            "with input and observed result for each issue.",
             s["body0"],
         )
     )
@@ -377,7 +377,7 @@ def build():
             "enumeration. Hashing with bcrypt was straightforward once I stopped thinking "
             "“encryption” and started thinking one-way hashing. A basic login still needs "
             "validation, safe rendering, hashing, sessions, and request authenticity. The "
-            "README documents how to run the hardened form and the vulnerable lab locally.",
+            "README documents how to run the hardened form and the vulnerable lab locally for graders.",
             s["body0"],
         )
     )
@@ -506,7 +506,7 @@ def build():
         "design takeaway is short: treat every field as hostile, keep queries parameterized, "
         "never render raw HTML from users, verify tokens correctly, and hash passwords with "
         "bcrypt before storage. Those habits map directly onto the three breaks I documented "
-        "with input and observed result.",
+        "with input and observed result for each issue.",
         "Building the form made the Juice Shop lessons practical. Client checks are UX—"
         "easy to skip—so the server is the real gate. CSRF forced me to think about forged "
         "requests, not only bad passwords. Using a dummy bcrypt hash for unknown emails "
@@ -514,7 +514,7 @@ def build():
         "enumeration. Hashing with bcrypt was straightforward once I stopped thinking "
         "“encryption” and started thinking one-way hashing. A basic login still needs "
         "validation, safe rendering, hashing, sessions, and request authenticity. The "
-        "README documents how to run the hardened form and the vulnerable lab locally.",
+        "README documents how to run the hardened form and the vulnerable lab locally for graders.",
         "The useful lesson was watching a real break, then turning it off. Leaving "
         "innerHTML on the lab page made XSS obvious; switching to textContent and CSP on "
         "the hardened page made the fix equally obvious. Client validation still let a "
