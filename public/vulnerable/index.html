@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juice Shop — Vulnerable Login (lab)</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .lab-banner {
+        background: #7a1f1f;
+        color: #fff8f5;
+        padding: 0.65rem 1rem;
+        font: 600 0.85rem/1.35 "DM Sans", system-ui, sans-serif;
+        text-align: center;
+      }
+      .lab-banner a {
+        color: #ffd7c2;
+      }
+      #reflected {
+        margin-top: 0.75rem;
+        min-height: 1.25rem;
+        font-size: 0.95rem;
+        color: #3a2a22;
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="lab-banner">
+      INTENTIONALLY VULNERABLE lab page (no CSP, reflects email via innerHTML).
+      Hardened form: <a href="/">/</a>
+    </p>
+    <div class="page">
+      <header class="brand">
+        <p class="brand-mark">OWASP Juice Shop</p>
+        <h1>Sign in (vulnerable)</h1>
+        <p class="lede">
+          Same UI as the assignment form, but the email is written into the page
+          with innerHTML — classic reflected XSS for Part 3.
+        </p>
+      </header>
+
+      <main>
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="text"
+              autocomplete="username"
+              placeholder="you@example.com"
+              maxlength="254"
+            />
+            <p class="hint" id="email-hint" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="At least 8 characters"
+              maxlength="128"
+            />
+            <p class="hint" id="password-hint" hidden></p>
+          </div>
+
+          <button type="submit" id="submit-btn">Log in</button>
+        </form>
+
+        <p id="form-status" class="status" role="status" aria-live="polite"></p>
+        <p id="reflected"></p>
+      </main>
+    </div>
+
+    <script src="/vulnerable/app.js"></script>
+  </body>
+</html>

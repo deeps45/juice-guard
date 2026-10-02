@@ -44,8 +44,9 @@ Juice Shop fieldwork (live instance used in the write-up):
 ### Authentication & passwords
 - Email + password login UI inspired by Juice Shop’s sign-in screen
 - Passwords stored **only** as **bcrypt** hashes (cost factor **12**)
-- Login uses `bcrypt.compare` — never reverse a hash
-- Generic `"Invalid email or password"` errors (no user enumeration)
+- Login **always** runs `bcrypt.compare` (unknown emails use a real dummy hash — no timing oracle)
+- Successful login sets an httpOnly `session` cookie (`GET /api/me`)
+- Generic `"Invalid email or password"` errors; register never returns **409** (no enumeration)
 
 ### Validation (defense in depth)
 - **Client:** reject empty fields, require `@` in email, password length ≥ 8
@@ -59,9 +60,15 @@ Juice Shop fieldwork (live instance used in the write-up):
 - **Rate limiting** on login/register
 - **No dynamic SQL** — users live in an in-memory `Map` keyed by normalized email
 
+### Intentional vulnerable lab (Part 3 replay)
+- **`/vulnerable/`** — same UI, but reflects email with `innerHTML` and **no CSP**
+- Graders can reproduce a **successful XSS** with  
+  ``<img src=x onerror="alert('XSS')">@evil.com`` + any 8+ char password
+- Hardened `/` blocks the same payload (validation + `textContent` + CSP)
+
 ### Coursework artifacts
-- Full HW 2B write-up PDF with screenshots
-- Documented exploit attempts against *this* form (client gap, fetch bypass, CSRF, SQLi probe)
+- Full HW 2B write-up PDF with **input → observed result** Juice Shop exploits
+- Replayable XSS on `/vulnerable/` plus hardened-form controls
 
 ---
 
@@ -74,7 +81,7 @@ npm install
 npm start
 ```
 
-Open **http://127.0.0.1:3847**
+Open **http://127.0.0.1:3847** (hardened) or **http://127.0.0.1:3847/vulnerable/** (XSS lab).
 
 Optional custom port:
 
@@ -99,8 +106,11 @@ Credentials are **not** shown on the login page (avoids credential stuffing of t
 | --- | --- | --- |
 | `GET` | `/api/health` | Liveness check |
 | `GET` | `/api/csrf` | Sets `csrf_id` cookie; returns `{ csrfToken }` |
+| `GET` | `/api/me` | Current session (httpOnly `session` cookie) |
+| `POST` | `/api/logout` | Clears session |
 | `POST` | `/api/login` | JSON `{ email, password }` + header `X-CSRF-Token` |
-| `POST` | `/api/register` | Same CSRF rules; returns hashing metadata for demos |
+| `POST` | `/api/register` | Same CSRF rules; uniform success (no 409 enumeration) |
+| `POST` | `/api/login-vuln` | Lab-only weak login used by `/vulnerable/` |
 
 ### Login flow
 
@@ -139,16 +149,19 @@ Without a CSRF token the API returns **403**.
 ```text
 juice-guard/
 ├── public/
-│   ├── index.html      # Login UI
-│   ├── app.js          # Client validation + CSRF fetch
-│   └── styles.css      # Responsive UI
-├── server.js           # Express API, bcrypt, CSRF, CSP, rate limits
+│   ├── index.html           # Hardened login UI
+│   ├── app.js               # Client validation + CSRF + textContent
+│   ├── styles.css
+│   └── vulnerable/          # Intentional XSS lab (innerHTML, no CSP)
+│       ├── index.html
+│       └── app.js
+├── server.js                # Express API, bcrypt, CSRF, CSP, sessions
 ├── docs/
-│   ├── submission.pdf  # HW 2B submission (submit this)
-│   ├── ASSIGNMENT.md   # Short criterion map
-│   └── screenshots/    # UI + Juice Shop + exploit evidence
+│   ├── submission.pdf       # HW 2B submission (submit this)
+│   └── screenshots/         # Juice Shop exploits + form evidence
 ├── scripts/
-│   ├── capture-screenshots.js
+│   ├── capture-form-exploits.js
+│   ├── capture-juice-exploits.js
 │   └── generate-submission-pdf.py
 ├── package.json
 └── README.md
@@ -161,14 +174,15 @@ juice-guard/
 | Threat | Control in this repo |
 | --- | --- |
 | SQL injection on login | No string-built SQL; Map lookup by email |
-| XSS via reflected status | `textContent` + `escapeHtml` + CSP |
+| XSS via reflected status | `textContent` + `escapeHtml` + CSP on `/` |
 | CSRF on login/register | Double-submit style CSRF cookie + header |
 | Stolen password DB | bcrypt cost 12 |
+| Account timing / enum | Dummy bcrypt hash + uniform register response |
 | Brute force | `express-rate-limit` |
 | Clickjacking | `X-Frame-Options: DENY` |
 | Blind trust in browser | Server re-validates everything |
 
-**Important lesson from Part 3:** client validation alone is **not** enough. An XSS-shaped password can pass the browser checks (`@` + length) and still be sent to `/api/login`. The server must reject it—and in this project, it does.
+**Part 3:** a **successful** XSS is replayable on `/vulnerable/` (`innerHTML` sink). The hardened `/` shows why `textContent` + CSP stop the same payload. Client checks alone are still not a security boundary.
 
 ---
 

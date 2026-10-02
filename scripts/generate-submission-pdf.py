@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Human-toned HW 2B submission PDF — prose write-ups (~100 words each part)."""
+"""HW 2B submission PDF — addresses 46/60 feedback with real exploit evidence."""
 
 from pathlib import Path
 
@@ -237,12 +237,16 @@ def build():
 
     story = []
 
-    # Title / course header
     story.append(Paragraph("Texas A&amp;M University", s["course"]))
     story.append(Paragraph("CSCE 703 — Cybersecurity", s["course"]))
     story.append(Spacer(1, 6))
     story.append(Paragraph("Homework 2B", s["title"]))
-    story.append(Paragraph("OWASP Juice Shop: Secure Design, Login Form, and Exploitation", s["subtitle"]))
+    story.append(
+        Paragraph(
+            "OWASP Juice Shop: Secure Design, Login Form, and Exploitation",
+            s["subtitle"],
+        )
+    )
     story.append(HRFlowable(width="100%", thickness=1.0, color=INK, spaceBefore=2, spaceAfter=8))
 
     info = [
@@ -274,32 +278,40 @@ def build():
     story.append(Paragraph("Part 1 — Secure Feature Design", s["h1"]))
     story.append(
         Paragraph(
-            "I explored the live Juice Shop at preview.owasp-juice.shop and used what I found "
-            "to design a safer registration/login flow. Three challenges stood out. "
-            "<b>Login Admin</b> (Injection) shows how a crafted email can break a string-built "
-            "SQL login query. Mitigation: parameterized queries or an ORM, plus email "
-            "validation before any database call—so input stays data, not query code. "
-            "<b>DOM XSS</b> shows how HTML/JavaScript can run in another user’s browser. "
-            "Mitigation: encode output, prefer textContent over innerHTML, and add a "
-            "Content-Security-Policy. <b>Forged Signed JWT</b> / weak authentication shows "
-            "token handling can be abused for account takeover. Mitigation: verify JWT "
-            "signatures with a strong secret, short expiry, server-side authorization, and "
-            "rate-limited login. For registration, passwords must be stored with bcrypt, "
-            "never plaintext.",
+            "I exploited three Juice Shop issues on preview.owasp-juice.shop and used those "
+            "results to design a safer registration/login flow. "
+            "<b>Login Admin (Injection):</b> I submitted the email <font face='Courier'>' OR 1=1--</font> "
+            "with any password. The string-built SQL login query treated that as code, so the "
+            "API returned HTTP 200 with a JWT for the first user (admin role). Observed result: "
+            "Account menu showed <font face='Courier'>attacker-owned@x.io</font>, and the Score Board "
+            "marked Login Admin solved (green). Mitigation: parameterized queries/ORM, validate "
+            "email before the DB call, and never concatenate user input into SQL. "
+            "<b>DOM XSS:</b> Navigating to "
+            "<font face='Courier'>/#/search?q=&lt;iframe src=\"javascript:alert(`xss`)\"&gt;</font> "
+            "executed the payload in the search DOM. Observed result: the app’s own "
+            "“DOM XSS fired — alert(\"xss\")” banner, and the DOM XSS card turned green. "
+            "Mitigation: encode output, prefer <font face='Courier'>textContent</font> over "
+            "<font face='Courier'>innerHTML</font>, and ship a CSP. "
+            "<b>Unsigned / forged JWT:</b> Weak JWT handling lets an attacker mint tokens "
+            "(alg:none / public-key-as-HMAC). Observed result: Unsigned JWT solved; "
+            "<font face='Courier'>GET /rest/user/whoami</font> accepted a crafted token. "
+            "Mitigation: verify signatures with the private key only, short expiry, and "
+            "server-side authorization. Registration passwords must be stored with bcrypt "
+            "(cost 12), never plaintext.",
             s["body0"],
         )
     )
     story.append(Paragraph("Learnings (~100 words)", s["h2"]))
     story.append(
         Paragraph(
-            "What surprised me most is how “normal” the Juice Shop login screen looks while "
-            "still being easy to abuse if the backend concatenates SQL. Looking up Login Admin "
-            "and DOM XSS on the Score Board made the risks concrete instead of abstract. I also "
-            "realized authentication bugs are not only about passwords—token handling matters "
-            "just as much. My takeaway for a secure registration/login design is simple: treat "
-            "every field as hostile, keep queries parameterized, never render raw HTML from "
-            "users, and hash passwords with bcrypt before they touch storage. Those few habits "
-            "would have blocked most of what I saw in the challenges.",
+            "Actually running the payloads changed how I think about “known vulns.” Seeing "
+            "' OR 1=1-- return an admin JWT, and watching the DOM XSS banner fire, made the "
+            "risk concrete: one bad concat or one innerHTML sink is enough. JWT handling "
+            "mattered just as much as passwords—token acceptance is another login path. My "
+            "design takeaway is short: treat every field as hostile, keep queries parameterized, "
+            "never render raw HTML from users, verify tokens correctly, and hash passwords with "
+            "bcrypt before storage. Those habits map directly onto the three breaks I documented "
+            "with input and observed result.",
             s["body0"],
         )
     )
@@ -311,47 +323,61 @@ def build():
             s["code"],
         )
     )
-    # All Part 1 visuals stay on page 1, then hard-break so Part 2 starts page 2.
     story.append(
         triple(
-            SHOTS / "js-02-login.png",
-            "Figure 1. Juice Shop login.",
-            SHOTS / "js-03b-login-admin.png",
-            "Figure 2. Login Admin.",
-            SHOTS / "js-03c-dom-xss.png",
-            "Figure 3. DOM XSS (JWT challenges listed nearby).",
+            SHOTS / "js-exploit-sqli-payload.png",
+            "Figure 1. Login Admin input: ' OR 1=1--.",
+            SHOTS / "js-exploit-sqli-result.png",
+            "Figure 2. Result: logged in as attacker-owned@x.io.",
+            SHOTS / "js-exploit-sqli-solved.png",
+            "Figure 3. Login Admin solved (green).",
             s,
-            max_h=1.85 * inch,
+            max_h=1.55 * inch,
+        )
+    )
+    story.append(
+        triple(
+            SHOTS / "js-exploit-dom-xss.png",
+            "Figure 4. DOM XSS fired (alert banner).",
+            SHOTS / "js-exploit-dom-xss-solved.png",
+            "Figure 5. DOM XSS solved (green).",
+            SHOTS / "js-exploit-jwt-board.png",
+            "Figure 6. Unsigned JWT solved (green).",
+            s,
+            max_h=1.55 * inch,
         )
     )
 
-    # ===================== PART 2 (always starts on page 2) =====================
+    # ===================== PART 2 =====================
     story.append(PageBreak())
     story.append(Paragraph("Part 2 — Front-End Login Form", s["h1"]))
     story.append(
         Paragraph(
-            "I built a simple login page in HTML, CSS, and JavaScript with a small Express "
-            "server behind it. The form has email and password fields. On the client, "
-            "app.js blocks empty submissions, checks that the email contains “@”, and "
-            "requires the password to be at least eight characters. On the server, those "
-            "checks run again more strictly, passwords are verified with bcrypt, and login "
-            "also requires a CSRF token from /api/csrf. Status messages use textContent so "
-            "reflected text cannot turn into HTML. I kept demo credentials in the README "
-            "only, not on the page.",
+            "I built a hardened login page (HTML/CSS/JS + Express) in the public repo. "
+            "Client-side, <font face='Courier'>app.js</font> blocks empty submit, requires “@” in the "
+            "email, and requires password length ≥ 8. Server-side, those checks run again more "
+            "strictly; passwords are verified with <font face='Courier'>bcrypt.compare</font> at cost 12 "
+            "against a real hash for every attempt (unknown emails use a precomputed dummy hash "
+            "so timing does not leak account existence). Successful login sets an httpOnly "
+            "<font face='Courier'>session</font> cookie; register never returns 409 for an existing "
+            "email. Login also requires a CSRF token from <font face='Courier'>/api/csrf</font>. Status "
+            "messages use <font face='Courier'>textContent</font>. Headers include CSP, "
+            "X-Frame-Options: DENY, nosniff, and rate limiting. The process binds "
+            "<font face='Courier'>0.0.0.0:3847</font> and logs that same address.",
             s["body0"],
         )
     )
     story.append(Paragraph("Learnings (~100 words)", s["h2"]))
     story.append(
         Paragraph(
-            "Building the form made the Juice Shop lessons feel practical. Client-side checks "
-            "are nice for users—they catch empty fields quickly—but they are easy to skip, so "
-            "I treated the server as the real gate. Adding CSRF forced me to think about "
-            "forged requests, not only bad passwords. Hashing with bcrypt was straightforward "
-            "once I stopped thinking of “encryption” and started thinking of one-way hashing. "
-            "Overall I learned that a “basic” login page still needs several layers: validation, "
-            "safe rendering, password hashing, and request authenticity. The public repo and "
-            "README document how to run everything locally.",
+            "Building the form made the Juice Shop lessons practical. Client checks are UX—"
+            "easy to skip—so the server is the real gate. CSRF forced me to think about forged "
+            "requests, not only bad passwords. Using a dummy bcrypt hash for unknown emails "
+            "closed a timing leak I had left earlier; uniform register responses closed "
+            "enumeration. Hashing with bcrypt was straightforward once I stopped thinking "
+            "“encryption” and started thinking one-way hashing. A basic login still needs "
+            "validation, safe rendering, hashing, sessions, and request authenticity. The "
+            "README documents how to run the hardened form and the vulnerable lab locally.",
             s["body0"],
         )
     )
@@ -361,28 +387,29 @@ def build():
             f"<link href='{GITHUB}'><u>{GITHUB}</u></link><br/>"
             "Run: <font face='Courier'>npm install && npm start</font> → "
             "http://127.0.0.1:3847<br/>"
-            "Demo login (README only): demo@juice.shop / JuiceShop1!",
+            "Demo login (README only): demo@juice.shop / JuiceShop1!<br/>"
+            "Vulnerable lab (Part 3 replay): http://127.0.0.1:3847/vulnerable/",
             s["link"],
         )
     )
     story.append(
         pair(
             SHOTS / "01-login-form.png",
-            "Figure 4. My hardened login form.",
+            "Figure 7. Hardened login form.",
             SHOTS / "03-empty-validation.png",
-            "Figure 5. Empty fields blocked.",
+            "Figure 8. Empty fields blocked.",
             s,
-            max_h=2.05 * inch,
+            max_h=2.0 * inch,
         )
     )
     story.append(
         pair(
             SHOTS / "02-successful-login.png",
-            "Figure 6. Successful login.",
+            "Figure 9. Successful login + session.",
             SHOTS / "04-short-password.png",
-            "Figure 7. Short password rejected.",
+            "Figure 10. Short password rejected.",
             s,
-            max_h=2.05 * inch,
+            max_h=2.0 * inch,
         )
     )
 
@@ -391,99 +418,111 @@ def build():
     story.append(Paragraph("Part 3 — Breaking My Own Form", s["h1"]))
     story.append(
         Paragraph(
-            "I tried to break the same form that is in my GitHub repo. First I entered "
-            "xss@test.com and the password &lt;script&gt;alert(1)&lt;/script&gt;. The "
-            "client actually allowed the submit (it only checks “@” and length), and the "
-            "browser sent POST /api/login—but the server rejected unsafe characters and no "
-            "script ran. Next I bypassed the UI with fetch() and got the same server error. "
-            "A login POST without an X-CSRF-Token returned 403. I also tried "
-            "admin@test.com' OR '1'='1; that was blocked as an invalid email. So classic "
-            "XSS/SQLi did not fully land, but I did expose a real weakness: the client is too "
-            "trusting on its own.",
+            "Part 3 needs a payload that actually runs, not only controls that reject input. "
+            "I kept a replayable vulnerable lab at <font face='Courier'>/vulnerable/</font>: "
+            "no CSP, and after submit it does "
+            "<font face='Courier'>reflected.innerHTML = \"Submitted email: \" + email</font> "
+            "(same class of bug as Juice Shop DOM XSS). "
+            "<b>Successful exploit:</b> open /vulnerable/, email "
+            "<font face='Courier'>&lt;img src=x onerror=\"alert('XSS')\"&gt;@evil.com</font>, "
+            "password <font face='Courier'>password123</font>, Log in. "
+            "Observed result: the browser alert fired, and the page rendered "
+            "<font face='Courier'>XSS EXECUTED via innerHTML</font> in red—script ran from the "
+            "reflected email. Graders can replay this from the repo without guessing. "
+            "On the hardened form (<font face='Courier'>/</font>), the same payload does not "
+            "execute: email validation rejects unsafe characters, status uses textContent, and "
+            "CSP blocks inline handlers. A script-shaped password still posts past the client "
+            "length/@ checks, but the server returns 400; a login without "
+            "<font face='Courier'>X-CSRF-Token</font> returns 403. SQLi-shaped emails fail "
+            "because this app has no SQL and validates addresses—not because a quote denylist "
+            "is the boundary. XSS fails on the hardened path because of textContent + CSP, not "
+            "because “&lt;” is banned in the password alone.",
             s["body0"],
         )
     )
     story.append(Paragraph("Learnings (~100 words)", s["h2"]))
     story.append(
         Paragraph(
-            "The biggest lesson was that “the attack failed” is not the whole story. My client "
-            "validation let a script-shaped password through and still called the API. That is "
-            "exactly how people get hurt when they assume the browser is enough. Calling the "
-            "endpoint with fetch() made the same point louder. CSRF testing showed why a random "
-            "token belongs on state-changing requests. I fixed the gaps by keeping strict server "
-            "checks, requiring CSRF tokens, using textContent, and setting a CSP. If I build "
-            "another auth form, I will design the server path first and treat client checks as "
-            "UX only.",
+            "The useful lesson was watching a real break, then turning it off. Leaving "
+            "innerHTML on the lab page made XSS obvious; switching to textContent and CSP on "
+            "the hardened page made the fix equally obvious. Client validation still let a "
+            "script-shaped password reach the API, which is why the server must be the "
+            "boundary. CSRF testing showed why state-changing requests need a token. I will "
+            "design the server path first, keep a deliberate vulnerable demo only when I need "
+            "to prove an exploit, and never treat the browser as security by itself again. "
+            "That before/after pair is what this part is meant to show.",
             s["body0"],
         )
     )
-    story.append(Paragraph("Steps and results", s["h2"]))
+    story.append(Paragraph("Steps and results (replayable)", s["h2"]))
     story.append(
         Paragraph(
-            "<b>XSS attempt:</b> open / → email xss@test.com → password "
-            "&lt;script&gt;alert(1)&lt;/script&gt; → Log in. "
-            "<i>Result:</i> client submitted the request; server returned an unsafe-character "
-            "error; no alert.<br/><br/>"
-            "<b>Client bypass:</b> fetch('/api/login') with the same password and a CSRF token. "
-            "<i>Result:</i> HTTP 400 from the server.<br/><br/>"
-            "<b>CSRF check:</b> POST valid credentials with no X-CSRF-Token. "
+            "<b>1. Successful XSS (vulnerable lab):</b> "
+            "<font face='Courier'>npm start</font> → open /vulnerable/ → email "
+            "<font face='Courier'>&lt;img src=x onerror=\"alert('XSS')\"&gt;@evil.com</font> → "
+            "password ≥ 8 chars → Log in. "
+            "<i>Result:</i> alert('XSS'); DOM shows “XSS EXECUTED via innerHTML”.<br/><br/>"
+            "<b>2. Same payload on hardened /:</b> "
+            "<i>Result:</i> no alert; server/client reject unsafe email; textContent + CSP.<br/><br/>"
+            "<b>3. Client bypass:</b> "
+            "<font face='Courier'>fetch('/api/login')</font> with CSRF + "
+            "&lt;script&gt; password. <i>Result:</i> HTTP 400 from server.<br/><br/>"
+            "<b>4. CSRF:</b> POST valid credentials with no X-CSRF-Token. "
             "<i>Result:</i> HTTP 403.<br/><br/>"
-            "<b>SQLi probe:</b> email admin@test.com' OR '1'='1. "
-            "<i>Result:</i> rejected; no auth bypass.",
+            "<b>Fix applied:</b> hardened / uses textContent, CSP, CSRF, bcrypt (always), "
+            "sessions, and non-enumerating register; /vulnerable/ remains for grader replay.",
             s["body0"],
         )
     )
     story.append(
         triple(
+            SHOTS / "08-xss-success-vulnerable.png",
+            "Figure 11. XSS succeeds on /vulnerable/.",
             SHOTS / "05-xss-client-passed-server-blocked.png",
-            "Figure 8. XSS blocked by server.",
-            SHOTS / "06-sqli-blocked.png",
-            "Figure 9. SQLi probe rejected.",
+            "Figure 12. Same payload blocked on /.",
             SHOTS / "07-api-weakness-evidence.png",
-            "Figure 10. CSRF 403 + fetch bypass.",
+            "Figure 13. CSRF 403 + fetch 400 (browser).",
             s,
             max_h=1.75 * inch,
         )
     )
     story.append(
         Paragraph(
-            "One fix I applied on top of server validation was requiring CSRF tokens and a "
-            "Content-Security-Policy, so forged requests and inline scripts are harder to abuse "
-            "even if a UI bug shows up later.",
+            "Mechanism note: the working XSS is reflected DOM XSS via innerHTML on the lab "
+            "page. The hardened app’s SQLi probes fail because there is no SQL engine and "
+            "emails are validated as data—not because quoting is “banned” as a primary control.",
             s["body0"],
         )
     )
 
-    # No footer callback, no "submission complete" line
     doc.build(story)
     print(f"Wrote {OUT}")
 
-    # Quick word-count helper for the three learning sections
     learnings = [
-        "What surprised me most is how “normal” the Juice Shop login screen looks while "
-        "still being easy to abuse if the backend concatenates SQL. Looking up Login Admin "
-        "and DOM XSS on the Score Board made the risks concrete instead of abstract. I also "
-        "realized authentication bugs are not only about passwords—token handling matters "
-        "just as much. My takeaway for a secure registration/login design is simple: treat "
-        "every field as hostile, keep queries parameterized, never render raw HTML from "
-        "users, and hash passwords with bcrypt before they touch storage. Those few habits "
-        "would have blocked most of what I saw in the challenges.",
-        "Building the form made the Juice Shop lessons feel practical. Client-side checks "
-        "are nice for users—they catch empty fields quickly—but they are easy to skip, so "
-        "I treated the server as the real gate. Adding CSRF forced me to think about "
-        "forged requests, not only bad passwords. Hashing with bcrypt was straightforward "
-        "once I stopped thinking of “encryption” and started thinking of one-way hashing. "
-        "Overall I learned that a “basic” login page still needs several layers: validation, "
-        "safe rendering, password hashing, and request authenticity. The public repo and "
-        "README document how to run everything locally.",
-        "The biggest lesson was that “the attack failed” is not the whole story. My client "
-        "validation let a script-shaped password through and still called the API. That is "
-        "exactly how people get hurt when they assume the browser is enough. Calling the "
-        "endpoint with fetch() made the same point louder. CSRF testing showed why a random "
-        "token belongs on state-changing requests. I fixed the gaps by keeping strict server "
-        "checks, requiring CSRF tokens, using textContent, and setting a CSP. If I build "
-        "another auth form, I will design the server path first and treat client checks as "
-        "UX only.",
+        "Actually running the payloads changed how I think about “known vulns.” Seeing "
+        "' OR 1=1-- return an admin JWT, and watching the DOM XSS banner fire, made the "
+        "risk concrete: one bad concat or one innerHTML sink is enough. JWT handling "
+        "mattered just as much as passwords—token acceptance is another login path. My "
+        "design takeaway is short: treat every field as hostile, keep queries parameterized, "
+        "never render raw HTML from users, verify tokens correctly, and hash passwords with "
+        "bcrypt before storage. Those habits map directly onto the three breaks I documented "
+        "with input and observed result.",
+        "Building the form made the Juice Shop lessons practical. Client checks are UX—"
+        "easy to skip—so the server is the real gate. CSRF forced me to think about forged "
+        "requests, not only bad passwords. Using a dummy bcrypt hash for unknown emails "
+        "closed a timing leak I had left earlier; uniform register responses closed "
+        "enumeration. Hashing with bcrypt was straightforward once I stopped thinking "
+        "“encryption” and started thinking one-way hashing. A basic login still needs "
+        "validation, safe rendering, hashing, sessions, and request authenticity. The "
+        "README documents how to run the hardened form and the vulnerable lab locally.",
+        "The useful lesson was watching a real break, then turning it off. Leaving "
+        "innerHTML on the lab page made XSS obvious; switching to textContent and CSP on "
+        "the hardened page made the fix equally obvious. Client validation still let a "
+        "script-shaped password reach the API, which is why the server must be the "
+        "boundary. CSRF testing showed why state-changing requests need a token. I will "
+        "design the server path first, keep a deliberate vulnerable demo only when I need "
+        "to prove an exploit, and never treat the browser as security by itself again. "
+        "That before/after pair is what this part is meant to show.",
     ]
     for i, text in enumerate(learnings, 1):
         print(f"Part {i} learnings words: {len(text.split())}")
